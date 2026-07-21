@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Iconos - Organiza</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, 100px); gap: 20px; }
+        .icon-card { background: white; padding: 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        img { width: 100%; height: auto; border-radius: 12px; }
+        p { margin: 8px 0 0; font-size: 12px; color: #666; }
+        button { padding: 12px 24px; background: #2196F3; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 20px 0; }
+        button:hover { background: #1976D2; }
+        .download-all { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>📱 Generador de Iconos - Organiza</h1>
+    <p>Haz clic en "Generar y Descargar todos" para obtener todos los tamaños de icono.</p>
+    <button onclick="generateAndDownloadAll()">⬇️ Generar y Descargar todos</button>
+    <div id="icons-grid" class="grid"></div>
+    <div class="download-all" id="download-section"></div>
+
+    <script>
+        // Tamaños requeridos por PWABuilder
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const iconColor = '#2196F3';
+        const textColor = '#FFFFFF';
+
+        function drawIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Fondo con gradiente azul
+            const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            gradient.addColorStop(0, '#42A5F5');
+            gradient.addColorStop(1, '#0D47A1');
+            ctx.fillStyle = gradient;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Borde decorativo
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.lineWidth = size * 0.02;
+            ctx.beginPath();
+            ctx.roundRect(size * 0.05, size * 0.05, size * 0.9, size * 0.9, size * 0.15);
+            ctx.stroke();
+
+            // Icono de lista (3 líneas)
+            ctx.fillStyle = textColor;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 8;
+
+            const lineWidth = size * 0.35;
+            const lineHeight = size * 0.08;
+            const spacing = size * 0.18;
+            const startY = (size - (lineHeight * 3 + spacing * 2)) / 2;
+
+            // Línea 1
+            ctx.beginPath();
+            ctx.roundRect(size * 0.3, startY, lineWidth, lineHeight, size * 0.04);
+            ctx.fill();
+
+            // Línea 2
+            ctx.beginPath();
+            ctx.roundRect(size * 0.3, startY + lineHeight + spacing, lineWidth, lineHeight, size * 0.04);
+            ctx.fill();
+
+            // Línea 3
+            ctx.beginPath();
+            ctx.roundRect(size * 0.3, startY + (lineHeight + spacing) * 2, lineWidth, lineHeight, size * 0.04);
+            ctx.fill();
+
+            // Checkmark decorativo
+            ctx.shadowBlur = 5;
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = `bold ${size * 0.3}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✓', size * 0.25, size * 0.85);
+
+            ctx.shadowBlur = 0;
+
+            return canvas;
+        }
+
+        // roundRect polyfill para canvas
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radii) {
+                const r = typeof radii === 'number' ? radii : (radii || 0);
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                return this;
+            };
+        }
+
+        function generateIcon(size) {
+            const canvas = drawIcon(size);
+            const link = document.createElement('a');
+            link.download = `icon-${size}x${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            return link;
+        }
+
+        function displayIcons() {
+            const grid = document.getElementById('icons-grid');
+            grid.innerHTML = '';
+            
+            sizes.forEach(size => {
+                const canvas = drawIcon(size);
+                const img = document.createElement('img');
+                img.src = canvas.toDataURL('image/png');
+                img.alt = `Icon ${size}x${size}`;
+                
+                const card = document.createElement('div');
+                card.className = 'icon-card';
+                card.appendChild(img);
+                
+                const p = document.createElement('p');
+                p.textContent = `${size}x${size}`;
+                card.appendChild(p);
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function generateAndDownloadAll() {
+            const zip = new JSZip();
+            const promises = sizes.map(size => {
+                return new Promise((resolve) => {
+                    const canvas = drawIcon(size);
+                    canvas.toBlob((blob) => {
+                        zip.file(`icon-${size}x${size}.png`, blob);
+                        resolve();
+                    }, 'image/png');
+                });
+            });
+
+            Promise.all(promises).then(() => {
+                zip.generateAsync({ type: 'blob' }).then((content) => {
+                    const link = document.createElement('a');
+                    link.download = 'organiza-icons.zip';
+                    link.href = URL.createObjectURL(content);
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                });
+            });
+        }
+
+        // Cargar JSZip desde CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        script.onload = () => {
+            displayIcons();
+            document.querySelector('button').style.display = 'block';
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
