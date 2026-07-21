@@ -1,4 +1,47 @@
 // Organiza - App de Lista de Tareas
+// app.js - Limpieza y actualización forzada
+async function forceUpdate() {
+    console.log('🔄 Forzando actualización de la app...');
+    
+    // 1. Limpiar cachés antiguas
+    if ('caches' in window) {
+        try {
+            const keys = await caches.keys();
+            const oldCaches = keys.filter(key => key !== 'organiza-v2');
+            await Promise.all(oldCaches.map(key => caches.delete(key)));
+            console.log('✅ Cachés antiguas eliminadas:', oldCaches);
+        } catch (e) {
+            console.warn('No se pudieron limpiar cachés:', e);
+        }
+    }
+    
+    // 2. Forzar actualización del Service Worker
+    if ('serviceWorker' in navigator) {
+        try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.update();
+                console.log('✅ SW actualizado:', registration);
+            }
+        } catch (e) {
+            console.warn('No se pudo actualizar SW:', e);
+        }
+    }
+    
+    // 3. Recargar la página si hay cambios
+    setTimeout(() => {
+        if (performance.navigation.type !== 1) { // No recargar si ya es recarga
+            console.log('🔄 Recargando página para aplicar cambios...');
+            window.location.reload();
+        }
+    }, 1000);
+}
+
+// Ejecutar al cargar la página
+document.addEventListener('DOMContentLoaded', forceUpdate);
+
+// El resto de tu código de la app...
+
 
 // Estado de la aplicación
 const state = {
