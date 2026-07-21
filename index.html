@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <title>Organiza - Lista de Tareas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app">
+        <header>
+            <h1>📋 Organiza</h1>
+            <p id="task-counter">0 tareas pendientes</p>
+        </header>
+
+        <main>
+            <!-- Formulario para añadir tareas -->
+            <div id="add-task-container">
+                <input type="text" id="task-input" placeholder="Escribe una nueva tarea..." maxlength="100">
+                <button id="add-task-btn">➕ Añadir</button>
+            </div>
+
+            <!-- Filtros -->
+            <div id="filters">
+                <button class="filter-btn active" data-filter="all">Todas</button>
+                <button class="filter-btn" data-filter="pending">Pendientes</button>
+                <button class="filter-btn" data-filter="completed">Completadas</button>
+            </div>
+
+            <!-- Lista de tareas -->
+            <div id="task-list">
+                <!-- Las tareas se renderizan aquí dinámicamente -->
+            </div>
+
+            <!-- Botones de acción -->
+            <div id="actions">
+                <button id="clear-completed-btn" class="action-btn">🗑️ Limpiar completadas</button>
+                <button id="toggle-all-btn" class="action-btn">☑️ Marcar/Desmarcar todas</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>Organiza &copy; 2026 - Tus tareas siempre a mano</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
